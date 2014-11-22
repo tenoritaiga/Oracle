@@ -55,7 +55,7 @@ function getMagicPrices(cardname)
   var pricestring = "Pricing data for " + cardname + ": \n";
   cardname = cardname.toLowerCase();
   cardname = cardname.replace(/ /g,"-");
-  cardname = cardname.replace('/,','/');
+  cardname = cardname.replace(/,/g, '');
   
   request('https://api.deckbrew.com/mtg/cards/'+cardname, function(err,resp,body) {
     if(resp.statusCode === 200)
@@ -201,7 +201,8 @@ incoming.on('message', function(msg) {
             sleep(1000);
             API.Bots.post(ACCESS_TOKEN,BOT_ID,
                 "List of current commands:\n" +
-                    "@mtg",
+                    "@mtg <card> - Display a card image to the group \n",
+		    "@price <card> - Get TCGPlayer pricing data for a card \n",
                 {},
                 function(err,res) {
                     if (err) {
