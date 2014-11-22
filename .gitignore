@@ -33,3 +33,6 @@ idea/*
 
 # Exclude Kate stuff
 *.kate-swp
+
+# Exclude auth file with API keys
+auth.js

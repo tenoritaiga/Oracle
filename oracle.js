@@ -43,6 +43,47 @@ function getMagicCard(cardname)
 	return dfd.promise();
 }
 
+function centsToDollars(value)
+{
+  return (value/100).toFixed(2);
+}
+
+function getMagicPrices(cardname)
+{
+  var dfd = new $.Deferred();
+  
+  var pricestring = "Pricing data for " + cardname + ": \n";
+  cardname = cardname.toLowerCase();
+  cardname = cardname.replace(/ /g,"-");
+  
+  request('https://api.deckbrew.com/mtg/cards/'+cardname, function(err,resp,body) {
+    if(resp.statusCode === 200)
+    {
+      var json = JSON.parse(body);
+      
+      for(i in json.editions)
+      {
+	if(json.editions[i].price)
+	{
+	  pricestring += json.editions[i].set + ":" + 
+	  " [ Low: $" + centsToDollars(json.editions[i].price.low) + 
+	  " Median: $" + centsToDollars(json.editions[i].price.median) +
+  " High: $" + centsToDollars(json.editions[i].price.high)
++ " ] \n";
+	}
+	
+      }
+      dfd.resolve(pricestring);
+    }
+    else
+    {
+      pricestring = "Got no results for that search, sorry.";
+      dfd.resolve(pricestring);
+    }
+  });
+  return dfd.promise();
+}
+
 function sleep(ms) {
     var start = new Date().getTime(), expire = start + ms;
     while (new Date().getTime() < expire) { }
