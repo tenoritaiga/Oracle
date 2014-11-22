@@ -55,6 +55,7 @@ function getMagicPrices(cardname)
   var pricestring = "Pricing data for " + cardname + ": \n";
   cardname = cardname.toLowerCase();
   cardname = cardname.replace(/ /g,"-");
+  cardname = cardname.replace('/,','/');
   
   request('https://api.deckbrew.com/mtg/cards/'+cardname, function(err,resp,body) {
     if(resp.statusCode === 200)
@@ -73,6 +74,8 @@ function getMagicPrices(cardname)
 	}
 	
       }
+      if(pricestring.length >= 450)
+	pricestring = pricestring.substring(0,400);
       dfd.resolve(pricestring);
     }
     else
