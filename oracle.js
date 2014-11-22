@@ -228,6 +228,26 @@ incoming.on('message', function(msg) {
                 });
         }
         
+        if(message[0] == "@price")
+	{
+	  sleep(1000);
+	  $.when( getMagicPrices(message[1]) ).done(
+	    function( status ) {
+	      console.log("getMagicPrices returned: "+status);
+	      API.Bots.post(
+		ACCESS_TOKEN, // Identify the access token
+		BOT_ID, // Identify the bot that is sending the message
+		status,
+		{}, // No pictures related to this post
+		function(err,res) {
+		  if (err) {
+		    console.log("[API.Bots.post] Reply Message Error!");
+		  } else {
+		    console.log("[API.Bots.post] Reply Message Sent!");
+		  }});
+	    });
+	}
+        
     }
 
 });
