@@ -1,0 +1,17 @@
+{
+	"name": "Oracle",
+	"description": "A fork of InfoMe stripped down and remixed for a games chat",
+	"author": {
+		"name": "Tony Mondelli"
+	},
+	"private": false,
+	"dependencies": {
+		"groupme": "latest",
+        	"execSync":"latest",
+        	"lodash":"latest",
+        	"jquery":"latest",
+        	"jsdom":"latest",
+        	"request":"latest",
+        	"express":"latest"
+	}
+}
