@@ -63,11 +63,13 @@ function getMagicPrices(cardname)
     if(resp.statusCode === 200)
     {
       var json = JSON.parse(body);
+      var inAtLeastOneSet = false;
       
       for(i in json.editions)
       {
 	if(json.editions[i].price && $.inArray(json.editions[i].set,ignoredSets) == -1 )
 	{
+	  inAtLeastOneSet = true;
 	  pricestring += json.editions[i].set + ":" + 
 	  " [ Low: $" + centsToDollars(json.editions[i].price.low) + 
 	  " Median: $" + centsToDollars(json.editions[i].price.median) +
@@ -75,7 +77,10 @@ function getMagicPrices(cardname)
 + " ] \n";
 	}
 	
+	if(!inAtLeastOneSet)
+	  pricestring = "There are no prices available for any non-ignored printings of this card.";
       }
+      
       if(pricestring.length >= 450)
 	pricestring = pricestring.substring(0,400);
       dfd.resolve(pricestring);
