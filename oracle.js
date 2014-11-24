@@ -57,6 +57,8 @@ function getMagicPrices(cardname)
   cardname = cardname.replace(/ /g,"-");
   cardname = cardname.replace(/,/g, '');
   
+  var ignoredSets = ["Judge Gift Program","Friday Night Magic"];
+  
   request('https://api.deckbrew.com/mtg/cards/'+cardname, function(err,resp,body) {
     if(resp.statusCode === 200)
     {
@@ -64,7 +66,7 @@ function getMagicPrices(cardname)
       
       for(i in json.editions)
       {
-	if(json.editions[i].price)
+	if(json.editions[i].price && $.inArray(json.editions[i].set,ignoredSets) == -1 )
 	{
 	  pricestring += json.editions[i].set + ":" + 
 	  " [ Low: $" + centsToDollars(json.editions[i].price.low) + 
