@@ -94,6 +94,49 @@ function getMagicPrices(cardname)
   return dfd.promise();
 }
 
+function getRandomMagicCardName()
+{
+  var dfd = new $.Deferred();
+  var randomcardname = "";
+  request('http://api.mtgdb.info/cards/random', function(err,resp,body) {
+    if(resp.statusCode === 200)
+    {
+      var json = JSON.parse(body);
+      randomcardname = json.name;
+      
+      dfd.resolve(randomcardname);
+    }
+    else
+    {
+      randomcardname = "Got no results for that search, sorry.";
+      dfd.resolve(randomcardname);
+    }
+  });
+  
+  return dfd.promise();
+}
+
+function getRandomMagicCardImage()
+{
+  var dfd = new $.Deferred();
+  
+  var randomcardname = "";
+  var randomcardurl = "";
+  $.when( getRandomMagicCardName() ).done(
+    function( status ) {
+      randomcardname = status;
+      
+      //Get image for this card
+      $.when( getMagicCard(randomcardname) ).done(
+	function( status ) {
+	  randomcardurl = status;
+	  dfd.resolve(randomcardurl);
+	});
+    });
+  
+  return dfd.promise();
+}
+
 function sleep(ms) {
     var start = new Date().getTime(), expire = start + ms;
     while (new Date().getTime() < expire) { }
@@ -245,6 +288,26 @@ incoming.on('message', function(msg) {
 	  $.when( getMagicPrices(message[1]) ).done(
 	    function( status ) {
 	      console.log("getMagicPrices returned: "+status);
+	      API.Bots.post(
+		ACCESS_TOKEN, // Identify the access token
+		BOT_ID, // Identify the bot that is sending the message
+		status,
+		{}, // No pictures related to this post
+		function(err,res) {
+		  if (err) {
+		    console.log("[API.Bots.post] Reply Message Error!");
+		  } else {
+		    console.log("[API.Bots.post] Reply Message Sent!");
+		  }});
+	    });
+	}
+	
+	if(message[0] == "@random")
+	{
+	  sleep(1000);
+	  $.when( getRandomMagicCardImage() ).done(
+	    function( status ) {
+	      console.log("getRandomMagicCardImage returned: "+status);
 	      API.Bots.post(
 		ACCESS_TOKEN, // Identify the access token
 		BOT_ID, // Identify the bot that is sending the message
