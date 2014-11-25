@@ -70,11 +70,7 @@ function getMagicPrices(cardname)
 	if(json.editions[i].price && $.inArray(json.editions[i].set,ignoredSets) == -1 )
 	{
 	  inAtLeastOneSet = true;
-	  pricestring += json.editions[i].set + ":" + 
-	  " [ Low: $" + centsToDollars(json.editions[i].price.low) + 
-	  " Median: $" + centsToDollars(json.editions[i].price.median) +
-  " High: $" + centsToDollars(json.editions[i].price.high)
-+ " ] \n";
+	  pricestring += json.editions[i].set + ": $" + centsToDollars(json.editions[i].price.median) + "\n";
 	}
 	
 	if(!inAtLeastOneSet)
