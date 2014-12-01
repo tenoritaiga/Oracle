@@ -48,16 +48,57 @@ function centsToDollars(value)
   return (value/100).toFixed(2);
 }
 
+function abbreviateSetName(sets)
+{
+  var setNamesMap = {
+    "Limited Edition Alpha":"Alpha",
+    "Limited Edition Beta":"Beta",
+    "Unlimited Edition":"Unlimited",
+    "Revised Edition":"Revised",
+    "Fourth Edition":"4th Ed",
+    "Fifth Edition":"5th Ed",
+    "Classic Sixth Edition":"6th Ed",
+    "Seventh Edition":"7th Ed",
+    "Eighth Edition":"8th Ed",
+    "Ninth Edition":"9th Ed",
+    "Tenth Edition":"10th Ed",
+    "Magic 2010":"M10",
+    "Magic 2011":"M11",
+    "Magic 2012":"M12",
+    "Magic 2012":"M13",
+    "Magic 2014 Core Set":"M14",
+    "Magic 2015 Core Set":"M15",
+    "Beatdown Box Set":"Beatdown",
+    "Battle Royale Box Set":"Battle Royale",
+    "Premium Deck Series: Fire and Lightning":"Fire & Lightning",
+    "Friday Night Magic":"FNM"
+  };
+  
+  
+  var regex = new RegExp(Object.keys(setNamesMap).join("|"),"gi");
+  sets = sets.replace(regex, function(matched){
+    return setNamesMap[matched];
+  });
+  
+  return sets;
+}
+
 function getMagicPrices(cardname)
 {
   var dfd = new $.Deferred();
   
-  var pricestring = "Pricing data for " + cardname + ": \n";
+  var pricestring = cardname + ": \n";
   cardname = cardname.toLowerCase();
   cardname = cardname.replace(/ /g,"-");
   cardname = cardname.replace(/,/g, '');
   
-  var ignoredSets = ["Judge Gift Program","Friday Night Magic"];
+  var ignoredSets = [
+  "Judge Gift Program",
+  "Media Inserts",
+  "WPN and Gateway",
+  "Magic Player Rewards",
+  "Legend Membership"
+  ];
   
   request('https://api.deckbrew.com/mtg/cards/'+cardname, function(err,resp,body) {
     if(resp.statusCode === 200)
@@ -70,11 +111,13 @@ function getMagicPrices(cardname)
 	if(json.editions[i].price && $.inArray(json.editions[i].set,ignoredSets) == -1 )
 	{
 	  inAtLeastOneSet = true;
-	  pricestring += json.editions[i].set + ": $" + centsToDollars(json.editions[i].price.median) + "\n";
+	  var setname = abbreviateSetName(json.editions[i].set);
+	  
+	  pricestring += setname + ": $" + centsToDollars(json.editions[i].price.median) + "\n";
 	}
 	
-	if(!inAtLeastOneSet)
-	  pricestring = "There are no prices available for any non-ignored printings of this card.";
+	//if(!inAtLeastOneSet)
+	 // pricestring = "There are no prices available for any non-ignored printings of this card.";
       }
       
       if(pricestring.length >= 450)
