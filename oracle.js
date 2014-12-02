@@ -83,14 +83,47 @@ function abbreviateSetName(sets)
   return sets;
 }
 
+function cardNameToSlug(cardname)
+{
+  cardname = cardname.toLowerCase();
+  cardname = cardname.replace(/ /g,"-");
+  cardname = cardname.replace(/,/g, '');
+  return cardname;
+}
+
+function getCardLegality(cardname)
+{
+  var dfd = new $.Deferred();
+  var legalformats = cardname + ": \n";
+  request('http://api.mtgdb.info/cards/' + cardNameToSlug(cardname), function(err,resp,body) {
+
+    if(body.length < 3)
+    {
+      legalformats = "Got no results for that search, sorry.";
+      dfd.resolve(legalformats);
+    }
+    else
+    {
+      var json = JSON.parse(body);
+      for(var i=0;i<json[0].formats.length;i++)
+      {
+	legalformats += json[0].formats[i].name + ": "
+	+ json[0].formats[i].legality + "\n";
+      }
+      
+      dfd.resolve(legalformats);
+    }
+  });
+  
+  return dfd.promise();
+}
+
 function getMagicPrices(cardname)
 {
   var dfd = new $.Deferred();
   
   var pricestring = cardname + ": \n";
-  cardname = cardname.toLowerCase();
-  cardname = cardname.replace(/ /g,"-");
-  cardname = cardname.replace(/,/g, '');
+  cardname = cardNameToSlug(cardname);
   
   var ignoredSets = [
   "Judge Gift Program",
@@ -327,6 +360,26 @@ incoming.on('message', function(msg) {
 	  $.when( getMagicPrices(message[1]) ).done(
 	    function( status ) {
 	      console.log("getMagicPrices returned: "+status);
+	      API.Bots.post(
+		ACCESS_TOKEN, // Identify the access token
+		BOT_ID, // Identify the bot that is sending the message
+		status,
+		{}, // No pictures related to this post
+		function(err,res) {
+		  if (err) {
+		    console.log("[API.Bots.post] Reply Message Error!");
+		  } else {
+		    console.log("[API.Bots.post] Reply Message Sent!");
+		  }});
+	    });
+	}
+	
+	if(message[0] == "@legality")
+	{
+	  sleep(1000);
+	  $.when( getCardLegality(message[1]) ).done(
+	    function( status ) {
+	      console.log("getCardLegality returned: "+status);
 	      API.Bots.post(
 		ACCESS_TOKEN, // Identify the access token
 		BOT_ID, // Identify the bot that is sending the message
