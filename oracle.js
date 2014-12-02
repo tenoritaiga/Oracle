@@ -324,7 +324,9 @@ incoming.on('message', function(msg) {
             API.Bots.post(ACCESS_TOKEN,BOT_ID,
                 "List of current commands:\n" +
                     "@mtg <card> - Display a card image to the group \n",
-		    "@price <card> - Get TCGPlayer pricing data for a card \n",
+		    "@price <card> - Get pricing data for a card \n",
+		    "@legality <card> - Get a card's legality \n",
+		    "@random - Show a random card \n",
                 {},
                 function(err,res) {
                     if (err) {
