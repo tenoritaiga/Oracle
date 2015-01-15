@@ -12,6 +12,7 @@
         	"jquery":"latest",
         	"jsdom":"latest",
         	"request":"latest",
-        	"express":"latest"
+        	"express":"latest",
+        	"grep1":"latest"
 	}
 }

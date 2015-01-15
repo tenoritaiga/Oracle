@@ -36,3 +36,6 @@ idea/*
 
 # Exclude auth file with API keys
 auth.js
+
+#Exclude Comprehensive Rules file (Copyrighted)
+comprules.txt

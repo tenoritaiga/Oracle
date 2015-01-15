@@ -2,6 +2,7 @@
 
 var auth = require("./auth");
 var util = require('util');
+var grep = require('grep1');
 var GroupMe = require('groupme');
 var sh = require('execSync');
 var API = GroupMe.Stateless;
@@ -209,6 +210,33 @@ function getRandomMagicCardImage()
   return dfd.promise();
 }
 
+function getCompRule(rulenumber)
+{
+  var dfd = new $.Deferred();
+  
+  var rulestext = "";
+  
+  grep(['-m 1','^'+rulenumber,'comprules.txt'], function(err, stdout, stderr) 
+  {
+    if(err || stderr) 
+    {
+      console.log(err,stderr);
+      rulestext = "Couldn't find that rule, sorry.";
+      dfd.resolve(rulestext);
+    } 
+    else 
+    {
+      rulestext = stdout;
+      if(rulestext.length >= 450)
+	rulestext = rulestext.substring(0,400);
+      //console.log(rulestext);
+      dfd.resolve(rulestext);
+    }
+  });
+  
+  return dfd.promise()
+}
+
 function sleep(ms) {
     var start = new Date().getTime(), expire = start + ms;
     while (new Date().getTime() < expire) { }
@@ -311,12 +339,20 @@ function forceReconnect()
 incoming.on('message', function(msg) {
   
   timeLastMessageReceived = new Date().getTime();
+  
+    var ignoredUsers = [
+    "Peter F",
+    "Peter Fatyga",
+    "Nickname",
+    "Nigger"
+  ];
 
   console.log("[IncomingStream 'message'] Message Received at " + timeLastMessageReceived);
     
     if(msg["data"]
         && msg["data"]["subject"]
-        && msg["data"]["subject"]["text"]) {
+        && msg["data"]["subject"]["text"]
+	&& $.inArray(msg["data"]["subject"]["name"],ignoredUsers) == -1) {
         var message = $.splitArgs(""+msg["data"]["subject"]["text"]);
         if(message[0] == "@help")
         {
@@ -355,6 +391,27 @@ incoming.on('message', function(msg) {
                             }});
                 });
         }
+        
+        if(message[0] == "@rule")
+        {
+            sleep(1000);
+            $.when( getCompRule(message[1]) ).done(
+                function( status ) {
+                    console.log("getCompRule returned: "+status);
+                    API.Bots.post(
+                        ACCESS_TOKEN, // Identify the access token
+                        BOT_ID, // Identify the bot that is sending the message
+                        status,
+                        {}, // No pictures related to this post
+                        function(err,res) {
+                            if (err) {
+                                console.log("[API.Bots.post] Reply Message Error!");
+                            } else {
+                                console.log("[API.Bots.post] Reply Message Sent!");
+                            }});
+                });
+        }
+        
         
         if(message[0] == "@price")
 	{
